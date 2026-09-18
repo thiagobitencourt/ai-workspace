@@ -1,0 +1,9 @@
+# Never commit secrets to this public repo
+.env
+.env.*
+*.key
+*.pem
+id_*
+!*.pub
+.credentials.json
+*.token
