@@ -6,6 +6,7 @@
     }
   ],
   "plugins": [
+    "neon@claude-plugins-official",
     "vercel@claude-plugins-official"
   ]
 }
