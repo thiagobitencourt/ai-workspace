@@ -53,9 +53,9 @@ claude                 # log in
 
 Skills synced from claude.ai (docx, pdf, xlsx, ...) come back automatically after login.
 
-## Adding things: `/install`
+## Adding things: `/workspace-install`
 
-Inside Claude Code in this repo, run `/install <what>` (e.g. `/install ripgrep`, `/install the sentry MCP`). The skill installs and configures it on the current machine, records it in the right manifest below, validates with `apply.sh`, commits, and asks before pushing. `/install --sync` saves things installed by hand.
+Inside Claude Code in this repo, run `/workspace-install <what>` (e.g. `/workspace-install ripgrep`, `/workspace-install the sentry MCP`). The skill installs and configures it on the current machine, records it in the right manifest below, validates with `apply.sh`, commits, and asks before pushing. `/workspace-install --sync` saves things installed by hand.
 
 | Manifest | What |
 |---|---|

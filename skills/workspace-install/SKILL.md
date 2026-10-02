@@ -1,11 +1,11 @@
 ---
-name: install
-description: Install and configure a tool, global package, MCP server, plugin, skill, setting or shell config on this machine AND persist it in the ai-workspace repo so every new environment gets it automatically. Use as `/install <what>`; `/install --sync` saves things installed by hand.
+name: workspace-install
+description: Install and configure a tool, global package, MCP server, plugin, skill, setting or shell config on this machine AND persist it in the ai-workspace repo so every new environment gets it automatically. Use as `/workspace-install <what>`; `/workspace-install --sync` saves things installed by hand.
 disable-model-invocation: true
 argument-hint: <what to install> | --sync
 ---
 
-# /install — install locally and persist in the repo
+# /workspace-install — install locally and persist in the ai-workspace repo
 
 The repo at `~/workspace/ai-workspace` is the source of truth of my environment. `bootstrap/setup.sh` (new VPS) and `bootstrap/apply.sh` (this machine) rebuild everything from **manifests**. Your job: install what I asked for now, then record it in the right manifest, so a fresh environment ends up identical.
 
@@ -32,7 +32,7 @@ Never add an item by editing `setup.sh` or `apply.sh`; only manifests. Change th
 ## Flow
 
 1. **Classify** the request into one row above. If it's ambiguous (same name in npm and apt, MCP vs plugin), ask me with AskUserQuestion. If several things were requested, handle each one in turn.
-2. **Find the official install method** if it isn't obvious: use the context7 MCP or the project's docs. Don't guess package names or URLs. Prefer a package manager over `tools/*.sh`.
+2. **Always consult context7 first** (mandatory, even for tools you think you know): call `mcp__context7__resolve-library-id` with the tool's name, then `mcp__context7__query-docs` for its installation/setup/configuration (and MCP/plugin config format when relevant). Use the commands, flags, package names and config shapes from those docs, not from memory. If context7 has no match, say so, then fall back to the official docs via WebSearch/WebFetch. If context7 is unavailable, tell me before continuing. Mention in the final report which docs/version you followed.
 3. **Install and configure locally**, then **verify** (`<cmd> --version`, `claude mcp get <name>`, `claude plugin list`, `npm ls -g --depth=0`). If it fails, stop and report. **Do not persist a failed install.**
 4. **Persist** in the manifest from the table. Keep files sorted/deduplicated, keep JSON valid. For `tools/*.sh` write an idempotent script and `chmod +x`.
 5. **Secrets check.** If the tool needs a key/token, use `"${VAR_NAME}"` placeholders (MCP `env`, settings) — never the value — and tell me which variable to set on new machines. Before committing, scan `git diff` for tokens, keys, passwords, `Authorization`, `.env` content; if anything looks real, remove it and redo with a placeholder.
@@ -41,7 +41,7 @@ Never add an item by editing `setup.sh` or `apply.sh`; only manifests. Change th
 8. **Commit** on the current branch: `feat: add <what>` (one commit per request), ending with the attribution lines required by the session's instructions. Then show me `git show --stat` and **ask before `git push`** (public repo). Push only after I confirm.
 9. **Report** in a few lines: what was installed, which manifest changed, commit hash, pending manual steps (login, OAuth via `/mcp`, env vars, restart of Claude to load new MCPs/skills).
 
-## `/install --sync`
+## `/workspace-install --sync`
 
 Reconcile what is installed by hand with the manifests:
 
