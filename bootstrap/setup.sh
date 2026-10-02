@@ -175,42 +175,9 @@ else
 fi
 ok "ai-workspace at $ws"
 
-# --- skills (symlinked so a git pull updates them) ---
-mkdir -p "$HOME/.claude/skills"
-for skill in "$ws"/skills/*/; do
-  [[ -d "$skill" ]] || continue
-  name="$(basename "$skill")"
-  target="$HOME/.claude/skills/$name"
-  if [[ -e "$target" && ! -L "$target" ]]; then
-    mv "$target" "$target.bak.$(date +%s)"
-    warn "Existing $target moved to backup"
-  fi
-  ln -sfn "${skill%/}" "$target"
-  ok "skill: $name"
-done
-
-# --- settings (never overwrite) ---
-if [[ -f "$HOME/.claude/settings.json" ]]; then
-  ok "~/.claude/settings.json already exists, kept"
-else
-  cp "$ws/claude/settings.json" "$HOME/.claude/settings.json"
-  ok "~/.claude/settings.json installed"
-fi
-
-# --- MCP servers (user scope, declared in claude/mcp-servers.json) ---
-claude_bin="$HOME/.local/bin/claude"
-while IFS= read -r name; do
-  if "$claude_bin" mcp get "$name" &>/dev/null; then
-    ok "mcp: $name already registered"
-  else
-    cfg="$(jq -c --arg n "$name" '.[$n]' "$ws/claude/mcp-servers.json")"
-    if "$claude_bin" mcp add-json --scope user "$name" "$cfg" &>/dev/null; then
-      ok "mcp: $name registered"
-    else
-      warn "mcp: failed to register $name"
-    fi
-  fi
-done < <(jq -r 'keys[]' "$ws/claude/mcp-servers.json")
+# --- declarative manifests (skills, settings, MCPs, plugins, npm/pipx, tools, shell env) ---
+export PATH="$HOME/.local/bin:$PATH"
+WS="$ws" CLAUDE_BIN="$HOME/.local/bin/claude" bash "$ws/bootstrap/apply.sh"
 
 # --- Playwright browser (headless Chromium + system libs for the playwright MCP) ---
 if sudo env "PATH=$PATH" npx -y playwright install-deps chromium >/dev/null 2>&1 \
@@ -224,6 +191,19 @@ fi
 ln -sfn "$ws/bootstrap/clone-repos.sh" "$HOME/.local/bin/clone-repos"
 ok "clone-repos available"
 USER_SCRIPT
+}
+
+setup_apt_manifest() {
+  log "Extra apt packages (packages/apt.txt)"
+  local home list pkgs
+  home="$(getent passwd "$NEW_USER" | cut -d: -f6)"
+  list="$home/workspace/ai-workspace/packages/apt.txt"
+  [[ -f "$list" ]] || { ok "No apt manifest"; return; }
+  pkgs="$(grep -Ev '^\s*(#|$)' "$list" || true)"
+  if [[ -z "$pkgs" ]]; then ok "Nothing to install"; return; fi
+  # shellcheck disable=SC2086
+  apt-get install -y $pkgs
+  ok "apt manifest installed"
 }
 
 summary() {
@@ -250,6 +230,7 @@ main() {
   setup_docker
   setup_gh
   setup_user_env
+  setup_apt_manifest
   summary
 }
 
