@@ -197,6 +197,29 @@ else
   ok "~/.claude/settings.json installed"
 fi
 
+# --- MCP servers (user scope, declared in claude/mcp-servers.json) ---
+claude_bin="$HOME/.local/bin/claude"
+while IFS= read -r name; do
+  if "$claude_bin" mcp get "$name" &>/dev/null; then
+    ok "mcp: $name already registered"
+  else
+    cfg="$(jq -c --arg n "$name" '.[$n]' "$ws/claude/mcp-servers.json")"
+    if "$claude_bin" mcp add-json --scope user "$name" "$cfg" &>/dev/null; then
+      ok "mcp: $name registered"
+    else
+      warn "mcp: failed to register $name"
+    fi
+  fi
+done < <(jq -r 'keys[]' "$ws/claude/mcp-servers.json")
+
+# --- Playwright browser (headless Chromium + system libs for the playwright MCP) ---
+if sudo env "PATH=$PATH" npx -y playwright install-deps chromium >/dev/null 2>&1 \
+   && npx -y playwright install chromium >/dev/null 2>&1; then
+  ok "playwright chromium installed"
+else
+  warn "playwright chromium install failed (MCP can still install it on demand via browser_install)"
+fi
+
 # --- helpers ---
 ln -sfn "$ws/bootstrap/clone-repos.sh" "$HOME/.local/bin/clone-repos"
 ok "clone-repos available"

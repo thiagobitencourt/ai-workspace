@@ -8,7 +8,7 @@ My AI workspace: Claude Code skills, settings, and the bootstrap for a fresh dev
 
 ```
 skills/        Claude Code skills (symlinked into ~/.claude/skills)
-claude/        Claude Code settings (settings.json)
+claude/        Claude Code settings (settings.json) and MCP servers (mcp-servers.json)
 bootstrap/     VPS setup scripts
 ```
 
@@ -36,6 +36,7 @@ What it does (idempotent, safe to re-run):
 - Configures git globals (+ gh as credential helper)
 - Installs Node via nvm and Claude Code (native installer)
 - Clones this repo to `~/workspace/ai-workspace`, symlinks the skills, installs `settings.json` if missing
+- Registers the MCP servers from `claude/mcp-servers.json` at user scope (context7, playwright) and installs headless Chromium for Playwright
 - Installs the `clone-repos` helper
 
 Then, as the new user:
@@ -48,6 +49,10 @@ claude                 # log in
 ```
 
 Skills synced from claude.ai (docx, pdf, xlsx, ...) come back automatically after login.
+
+## Adding an MCP server
+
+Add an entry to `claude/mcp-servers.json` (same JSON as `claude mcp add-json`) and re-run `setup.sh`. Already-registered servers are skipped. Never put secrets there: use `"env": {"KEY": "${KEY}"}` and set the value on the VPS. OAuth-based MCPs need `/mcp` inside `claude` to authenticate.
 
 ## Manual migration checklist
 
