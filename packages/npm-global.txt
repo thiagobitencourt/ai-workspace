@@ -1,1 +1,2 @@
 # One global npm package per line (pkg or pkg@version)
+vercel
