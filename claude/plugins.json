@@ -1,4 +1,11 @@
 {
-  "marketplaces": [],
-  "plugins": []
+  "marketplaces": [
+    {
+      "name": "claude-plugins-official",
+      "source": "anthropics/claude-plugins-official"
+    }
+  ],
+  "plugins": [
+    "vercel@claude-plugins-official"
+  ]
 }

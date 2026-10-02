@@ -155,11 +155,14 @@ apply_shell_env() {
   ok "shell/env.sh sourced from ~/.bashrc"
 }
 
+# PATH tweaks from shell/env.sh (e.g. ~/.bun/bin) must be visible to the steps below.
+[ -f "$WS/shell/env.sh" ] && . "$WS/shell/env.sh"
+
 apply_skills
 apply_settings
 apply_mcp
-apply_plugins
 apply_npm
 apply_pipx
-apply_tools
+apply_tools      # before plugins: plugins may need tool runtimes (vercel plugin needs bun)
+apply_plugins
 apply_shell_env
