@@ -8,7 +8,9 @@ My AI workspace: Claude Code skills, settings, and the bootstrap for a fresh dev
 
 ```
 skills/        Claude Code skills (symlinked into ~/.claude/skills)
-claude/        settings.json, mcp-servers.json, plugins.json
+claude/        settings.json, mcp-servers.json, plugins.json,
+               CLAUDE.md (global working agreement) and templates/novo-projeto/ (new-project kit),
+               both symlinked into ~/.claude
 packages/      apt.txt, npm-global.txt, pipx.txt (one package per line)
 tools/         idempotent installers for tools without a package manager
 shell/         env.sh (exports/aliases/PATH, sourced from ~/.bashrc)
@@ -38,7 +40,7 @@ What it does (idempotent, safe to re-run):
 - Installs Docker + Compose (official repo) and the GitHub CLI
 - Configures git globals (+ gh as credential helper)
 - Installs Node via nvm and Claude Code (native installer)
-- Clones this repo to `~/workspace/ai-workspace` and runs `bootstrap/apply.sh`, which applies every manifest: skills (symlinks), `settings.json` (merged over the local file), MCP servers, plugins, npm/pipx packages, `tools/*.sh`, `shell/env.sh`
+- Clones this repo to `~/workspace/ai-workspace` and runs `bootstrap/apply.sh`, which applies every manifest: skills (symlinks), `CLAUDE.md` and the new-project kit (symlinks), `settings.json` (merged over the local file), MCP servers, plugins, npm/pipx packages, `tools/*.sh`, `shell/env.sh`
 - Installs `packages/apt.txt` and headless Chromium for the Playwright MCP
 - Installs the `clone-repos` helper
 

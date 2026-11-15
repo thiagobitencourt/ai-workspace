@@ -3,7 +3,8 @@
 # Runs as the normal user (no root), idempotent. Used by setup.sh on a new VPS
 # and by the /install skill locally to prove a manifest reproduces the state.
 #
-# Manifests: skills/, claude/{settings,mcp-servers,plugins}.json, packages/{npm-global,pipx}.txt,
+# Manifests: skills/, claude/{settings,mcp-servers,plugins}.json, claude/CLAUDE.md,
+#            claude/templates/, packages/{npm-global,pipx}.txt,
 #            tools/*.sh, shell/env.sh   (packages/apt.txt needs root: see setup.sh)
 set -eo pipefail
 
@@ -51,6 +52,25 @@ apply_settings() {
     cp "$WS/claude/settings.json" "$dest"
     ok "settings.json installed"
   fi
+}
+
+# Global working agreement (~/.claude/CLAUDE.md) and the new-project kit, symlinked so the
+# repo stays the source of truth (editing ~/.claude/CLAUDE.md edits the repo file).
+apply_claude_docs() {
+  log "Claude working agreement and templates"
+  mkdir -p "$HOME/.claude/templates"
+  local src target pair
+  for pair in "CLAUDE.md:CLAUDE.md" "templates/novo-projeto:templates/novo-projeto"; do
+    src="$WS/claude/${pair%%:*}"
+    target="$HOME/.claude/${pair#*:}"
+    [[ -e "$src" ]] || continue
+    if [[ -e "$target" && ! -L "$target" ]]; then
+      mv "$target" "$target.bak.$(date +%s)"
+      warn "Existing $target moved to backup"
+    fi
+    ln -sfn "$src" "$target"
+    ok "${pair#*:}"
+  done
 }
 
 apply_mcp() {
@@ -160,6 +180,7 @@ apply_shell_env() {
 
 apply_skills
 apply_settings
+apply_claude_docs
 apply_mcp
 apply_npm
 apply_pipx
